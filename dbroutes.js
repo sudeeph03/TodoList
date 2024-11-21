@@ -93,12 +93,10 @@ export async function newTodo(req, res) {
 }
 
 export async function updateTodo(req, res) {
-    const task = req.body.task;
+    const taskToBeUpdated = req.body.task;
     const updatedTask = req.body.update;
 
-    const findTask = tasks.find((task) => {
-        task == tasks.task;
-    });
+    const findTask = tasks.find((task) => taskToBeUpdated == task.task);
 
     if (findTask) {
         findTask.task = updatedTask;
@@ -106,17 +104,21 @@ export async function updateTodo(req, res) {
         res.json({
             message: "Done! Updated",
         });
+    } else {
+        res.json({
+            message: "You fool",
+        });
     }
 }
 
 export async function deleteTodo(req, res) {
-    const task = req.body.task;
+    const taskToBeDeleted = req.body.task;
 
     const taskIndex = tasks.findIndex((task) => {
-        task == tasks.task;
+        task.task == taskToBeDeleted;
     });
 
-    if (findTask) {
+    if (taskIndex) {
         tasks.splice(taskIndex, 1);
 
         res.json({

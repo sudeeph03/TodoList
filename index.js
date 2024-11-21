@@ -13,12 +13,6 @@ const port = 3000;
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-    res.status(200).json({
-        users: users,
-    });
-});
-
 app.post("/signup", signUpUser);
 
 app.post("/signin", signInUser);

@@ -5,17 +5,30 @@ let users = [];
 let tasks = [];
 let userId = 0;
 
-export async function signUpUser(req, res) {
+export function checkInputs(req, res, next) {
     const username = req.body.username;
     const password = req.body.password;
 
-    const userFound = users.find((user) => username == user.username);
+    if (username == "" || password == "") {
+        res.status(400).json({
+            message: "Please fill the input boxes",
+        });
+        return;
+    }
+
+    req.username = username;
+    req.password = password;
+    next();
+}
+
+export async function signUpUser(req, res) {
+    const userFound = users.find((user) => req.username == user.username);
 
     if (!userFound) {
         users.push({
             userId: userId + 1,
-            username,
-            password,
+            username: req.username,
+            password: req.password,
             role: "user",
         });
 
@@ -32,11 +45,8 @@ export async function signUpUser(req, res) {
 }
 
 export async function signInUser(req, res) {
-    const username = req.body.username;
-    const password = req.body.password;
-
     const userFound = users.find(
-        (user) => username == user.username && password == user.password
+        (user) => req.username == user.username && req.password == user.password
     );
 
     if (userFound) {
@@ -72,18 +82,24 @@ export async function checkUser(req, res, next) {
 }
 
 export async function getTodos(req, res) {
-    const userTasks = tasks.filter(
-        (task) => task.username === req.user.username
-    );
+    const userTasks = tasks.filter((task) => task.userId === req.user.userId);
 
     res.send(userTasks);
 }
 
 export async function newTodo(req, res) {
+    const taskId = req.body.taskId;
     const task = req.body.task;
+
+    if (task == "") {
+        return res.status(400).json({
+            message: "Please enter a task!",
+        });
+    }
 
     tasks.push({
         userId: req.user.userId,
+        taskId,
         task: task,
     });
 
@@ -93,10 +109,18 @@ export async function newTodo(req, res) {
 }
 
 export async function updateTodo(req, res) {
-    const taskToBeUpdated = req.body.task;
+    const taskId = req.body.taskId;
     const updatedTask = req.body.update;
 
-    const findTask = tasks.find((task) => taskToBeUpdated == task.task);
+    if (task == "") {
+        return res.status(400).json({
+            message: "Please enter a task!",
+        });
+    }
+
+    const findTask = tasks.find(
+        (task) => taskId == task.taskId && task.username == req.user.username
+    );
 
     if (findTask) {
         findTask.task = updatedTask;
@@ -112,10 +136,10 @@ export async function updateTodo(req, res) {
 }
 
 export async function deleteTodo(req, res) {
-    const taskToBeDeleted = req.body.task;
+    const taskToBeDeleted = req.body.taskId;
 
     const taskIndex = tasks.findIndex((task) => {
-        task.task == taskToBeDeleted;
+        task.taskId == taskToBeDeleted;
     });
 
     if (taskIndex) {

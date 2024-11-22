@@ -7,11 +7,14 @@ import {
     updateTodo,
     deleteTodo,
     checkUser,
+    checkInputs,
 } from "./dbroutes.js";
 const app = express();
 const port = 3000;
 
 app.use(express.json());
+
+app.use(["/signup", "/signin"],checkInputs)
 
 app.post("/signup", signUpUser);
 
